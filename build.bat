@@ -96,7 +96,7 @@ ml64 /nologo /c "%CODDIR%\asm\x87_trig.asm"
 if errorlevel 1 ( echo === MASM x87_trig FAILED === && exit /b 1 )
 
 cl /nologo /O2 /fp:precise /W0 /DDETERMINISTIC_SORT /d1trimfile:%CODDIR%\ ^
-   /I"%ZLIBDIR%" /I"%MZIPDIR%" /I"%CODDIR%" /I"%SRCDIR%" ^
+   /I"%ZLIBDIR%" /I"%MZIPDIR%" /I"%CODDIR%" /I"%SRCDIR%." ^
    "%CODDIR%\aabbtree.c" ^
    "%CODDIR%\brush.c" ^
    "%CODDIR%\bsp.c" ^
