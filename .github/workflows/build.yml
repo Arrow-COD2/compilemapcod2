@@ -23,6 +23,21 @@ jobs:
           New-Item -ItemType Directory -Force out | Out-Null
           Select-String -Path $f -Pattern 'OUTDIR=|SRCDIR%\.'
 
+      - name: Add missing minizip header (ints.h)
+        shell: pwsh
+        run: |
+          # ioapi.h includes "ints.h" (zlib contrib/minizip) but the file is not in the repository.
+          # Only ui64_t is used.
+          $h = @(
+            '#ifndef MIN_INTS_H'
+            '#define MIN_INTS_H'
+            '#include <stdint.h>'
+            'typedef uint64_t ui64_t;'
+            '#endif'
+          ) -join "`r`n"
+          Set-Content 'cod2src/libs/minizip/ints.h' $h
+          Get-Content 'cod2src/libs/minizip/ints.h'
+
       - name: Build cod2map.exe and cod2map64.exe
         shell: cmd
         run: call build.bat
