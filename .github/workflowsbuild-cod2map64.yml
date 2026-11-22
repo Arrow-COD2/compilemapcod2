@@ -1,0 +1,26 @@
+name: build-cod2map64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build cod2map.exe and cod2map64.exe
+        shell: cmd
+        run: |
+          mkdir out
+          powershell -NoProfile -Command "(Get-Content build.bat) -replace '^set OUTDIR=.*$', 'set OUTDIR=%GITHUB_WORKSPACE%\out' | Set-Content build.bat"
+          call build.bat
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: cod2map-binaries
+          path: |
+            out/cod2map64.exe
+            out/cod2map.exe
+          if-no-files-found: error
