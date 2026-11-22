@@ -1,0 +1,37 @@
+name: build-cod2map64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    # README asks for VS 2022 or later; windows-2022 ships VS 2022 (windows-latest now ships VS 2026)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch build.bat
+        shell: pwsh
+        run: |
+          $f = 'build.bat'
+          $s = Get-Content $f -Raw
+          # Output folder inside the workspace
+          $s = $s -replace 'set OUTDIR=[^\r\n]*', "set OUTDIR=$env:GITHUB_WORKSPACE\out"
+          # %~dp0 ends with '\' so /I"%SRCDIR%" turns into an escaped quote (\") and breaks cl's command line
+          $s = $s.Replace('/I"%SRCDIR%"', '/I"%SRCDIR%."')
+          Set-Content $f $s -NoNewline
+          New-Item -ItemType Directory -Force out | Out-Null
+          Select-String -Path $f -Pattern 'OUTDIR=|SRCDIR%\.'
+
+      - name: Build cod2map.exe and cod2map64.exe
+        shell: cmd
+        run: call build.bat
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: cod2map-binaries
+          path: |
+            out/cod2map64.exe
+            out/cod2map.exe
+          if-no-files-found: error
